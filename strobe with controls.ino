@@ -41,8 +41,6 @@ void loop() {
     } else {
       // if the current state is LOW then the button went from on to off:
     }
-    // Delay a little bit to avoid bouncing
-    // delay(10);
   }
   // save the current state as the last state, for next time through the loop
   lastButtonState = buttonState;
