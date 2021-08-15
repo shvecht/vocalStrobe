@@ -1,3 +1,18 @@
+/*
+ Sketch Name: vocalStrobe
+ 
+ partly based on sketch by Clyde A. Lettsome, PhD, PE, MEM. (https://clydelettsome.com/blog/2019/12/18/my-weekend-project-audio-frequency-detector-using-an-arduino/).
+ 
+ Modified and updated by Isaac Shochat, MD.
+ 
+ Description: This sketch recognises the approximate frequency of the loudest sound detected by a sound detection module, and strobe light accordingly. For this project, the analog output from the sound module detector sends the analog audio signal detected to A1 of the Arduino Nano. The analog signal is sampled and quantized (digitized). A Fast Fourier Transform (FFT) is then performed on the digitized data. The FFT converts the digital data from the approximate discrete-time domain result. The maximum frequency of the approximate discrete-time domain result is then determined and transferred into a approximately one second loop of HIGH and LOW LED pin, which is than can be manually adusted using potentiometer connected to A0 pin, allowing for tracking vocal folds movement when connected to an endoscope.
+
+ Note: The arduinoFFT.h library needs to be added to the Arduino IDE before compiling and uploading this script/sketch to an Arduino.
+
+ License: This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License (GPL) version 3, or any later version of your choice, as published by the Free Software Foundation.
+
+*/
+
 #include <arduinoFFT.h>
 
 #define SAMPLES 128              //SAMPLES-pt FFT. Must be a base 2 number. Max 128 for Arduino Uno.
