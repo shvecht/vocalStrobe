@@ -53,7 +53,7 @@ void loop() {
 
   /*Find peak frequency */
   double peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
-  // Serial.println(peak);  // Printing the percieved frequency to the serial monitor.
+  // Serial.println(peak);  // Printing the perceived frequency to the serial monitor.
 
   if (peak < 75) {
     PORTB |= _BV(5);  // digitalWrite(LED_BUILTIN, HIGH);
