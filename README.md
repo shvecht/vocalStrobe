@@ -10,7 +10,7 @@ Vocal Strobe is an Arduino sketch that drives a strobe light based on audio inpu
 - Uses the built-in LED on pin **13** as an indicator
 - Designed to run on Arduino Nano/Uno class boards
 
-3D printable case files are provided in the `3D model` folder (`Top.STL`, `Bottom-left.STL`, `Bottom-right.STL`, and `3D Case.zip`). See `Strobe.pdf` for assembly guidance.
+3D printable case files are provided in the `3D model` folder (`Top.STL`, `Bottom-left.STL`, `Bottom-right.STL`). See `Strobe.pdf` for assembly guidance.
 
 ## Building the Sketch
 
