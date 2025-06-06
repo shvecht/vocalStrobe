@@ -23,8 +23,8 @@ arduinoFFT FFT = arduinoFFT();
 unsigned int samplingPeriod;
 unsigned long microSeconds;
 
-double vReal[SAMPLES];  //create vector of size SAMPLES to hold real values
-double vImag[SAMPLES];  //create vector of size SAMPLES to hold imaginary values
+double vReal[SAMPLES];  //create array of size SAMPLES to hold real values
+double vImag[SAMPLES];  //create array of size SAMPLES to hold imaginary values
 
 void setup() {
   samplingPeriod = round(1000000 * (1.0 / SAMPLING_FREQUENCY));  //Period in microseconds
