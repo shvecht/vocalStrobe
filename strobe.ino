@@ -69,8 +69,8 @@ void strobe(double freq) {
   float adjustment = map(reading, 0, 1024, -19, 20);
 
   // Set the interval, and 'On' portion of the strobe
-  int interval = 1000000 / (freq + adjustment);
-  int pause = interval / 5;
+  unsigned long interval = 1000000 / (freq + adjustment);
+  unsigned long pause = interval / 5;
   interval -= pause;
 
   // Looping 'On' and 'Off', for one second
