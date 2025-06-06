@@ -14,6 +14,7 @@
 */
 
 #include <arduinoFFT.h>
+#include <avr/interrupt.h>
 
 #define SAMPLES 128              //SAMPLES-pt FFT. Must be a base 2 number. Max 128 for Arduino Uno.
 #define SAMPLING_FREQUENCY 1024  //Ts = Based on Nyquist, must be 2 times the highest expected frequency.
@@ -23,43 +24,65 @@ arduinoFFT FFT = arduinoFFT();
 unsigned int samplingPeriod;
 unsigned long microSeconds;
 
-double vReal[SAMPLES];  //create array of size SAMPLES to hold real values
-double vImag[SAMPLES];  //create array of size SAMPLES to hold imaginary values
+volatile double vReal[SAMPLES];  // buffer for real values
+volatile double vImag[SAMPLES];  // buffer for imaginary values
+volatile byte sampleIndex = 0;   // current position in the buffer
+volatile bool bufferReady = false;  // set once SAMPLES are captured
+
+double prevFreq = 0;  // last detected frequency used for strobing
+
+void setupTimer1() {
+  cli();                 // disable interrupts while configuring
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1 = 0;
+
+  // compare match every ~977us using prescaler 8
+  OCR1A = 1953;          // (977us / 0.5us) - 1
+  TCCR1B |= _BV(WGM12);  // CTC mode
+  TCCR1B |= _BV(CS11);   // prescaler 8
+  TIMSK1 |= _BV(OCIE1A); // enable compare match interrupt
+  sei();                 // enable interrupts
+}
+
+ISR(TIMER1_COMPA_vect) {
+  if (bufferReady) return;  // ignore samples until processed
+
+  vReal[sampleIndex] = analogRead(A1);
+  vImag[sampleIndex] = 0;
+  sampleIndex++;
+
+  if (sampleIndex >= SAMPLES) {
+    sampleIndex = 0;
+    bufferReady = true;
+  }
+}
 
 void setup() {
   samplingPeriod = round(1000000 * (1.0 / SAMPLING_FREQUENCY));  //Period in microseconds
   DDRD |= _BV(5);                                                // pinMode(5, OUTPUT);
   DDRB |= _BV(5);                                                // pinMode(LED_BUILTIN, OUTPUT);
+  setupTimer1();
   // Serial.begin(9600);                                         //Baud rate for the Serial Monitor
 }
 
 void loop() {
 
-  /*Sample SAMPLES times*/
-  for (int i = 0; i < SAMPLES; i++) {
-    microSeconds = micros();  //Returns the number of microseconds since the Arduino board began running the current script.
+  if (bufferReady) {
+    FFT.Windowing((double*)vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+    FFT.Compute((double*)vReal, (double*)vImag, SAMPLES, FFT_FORWARD);
+    FFT.ComplexToMagnitude((double*)vReal, (double*)vImag, SAMPLES);
 
-    vReal[i] = analogRead(A1);  //Reads the value from analog pin 1 (A1), quantize it and save it as a real term.
-    vImag[i] = 0;               //Makes imaginary term 0 always
-
-    /* remaining wait time between samples if necessary */
-    while (micros() < (microSeconds + samplingPeriod)) {}
+    double peak = FFT.MajorPeak((double*)vReal, SAMPLES, SAMPLING_FREQUENCY);
+    prevFreq = peak;
+    bufferReady = false;  // allow ISR to fill buffer again
   }
 
-  /*Perform FFT on samples*/
-  FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
-  FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
-  FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
-
-  /*Find peak frequency */
-  double peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
-  // Serial.println(peak);  // Printing the perceived frequency to the serial monitor.
-
-  if (peak < 75) {
+  if (prevFreq < 75) {
     PORTB |= _BV(5);  // digitalWrite(LED_BUILTIN, HIGH);
   } else {
     PORTB &= ~_BV(5);  // digitalWrite(LED_BUILTIN, LOW);
-    strobe(peak);
+    strobe(prevFreq);
   }
 }
 
