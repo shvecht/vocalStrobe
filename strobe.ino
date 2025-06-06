@@ -27,7 +27,7 @@ double vReal[SAMPLES];  //create array of size SAMPLES to hold real values
 double vImag[SAMPLES];  //create array of size SAMPLES to hold imaginary values
 
 void setup() {
-  samplingPeriod = round(1000000 * (1.0 / SAMPLING_FREQUENCY));  //Period in microseconds
+  samplingPeriod = 1000000UL / SAMPLING_FREQUENCY;  //Period in microseconds
   DDRD |= _BV(5);                                                // pinMode(5, OUTPUT);
   DDRB |= _BV(5);                                                // pinMode(LED_BUILTIN, OUTPUT);
   // Serial.begin(9600);                                         //Baud rate for the Serial Monitor
@@ -65,11 +65,16 @@ void loop() {
 
 void strobe(double freq) {
 
-  float reading = analogRead(A0);
-  float adjustment = map(reading, 0, 1023, -19, 20);
+  int reading = analogRead(A0);
+  int adjustment = map(reading, 0, 1023, -19, 20);
 
-  // Set the interval, and 'On' portion of the strobe
-  unsigned long interval = 1000000 / (freq + adjustment);
+  // Set the interval, and 'On' portion of the strobe using integer math
+  unsigned int freqInt = (unsigned int)freq;
+  int adjustedFreq = freqInt + adjustment;
+  if (adjustedFreq <= 0) {
+    adjustedFreq = 1;  // prevent divide by zero or negative values
+  }
+  unsigned long interval = 1000000UL / adjustedFreq;
   unsigned long pause = interval / 5;
   interval -= pause;
 
