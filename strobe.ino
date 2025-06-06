@@ -66,7 +66,7 @@ void loop() {
 void strobe(double freq) {
 
   float reading = analogRead(A0);
-  float adjustment = map(reading, 0, 1024, -19, 20);
+  float adjustment = map(reading, 0, 1023, -19, 20);
 
   // Set the interval, and 'On' portion of the strobe
   int interval = 1000000 / (freq + adjustment);
