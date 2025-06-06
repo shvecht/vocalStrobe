@@ -21,7 +21,6 @@
 
 arduinoFFT FFT = arduinoFFT();
 
-unsigned int samplingPeriod;
 unsigned long microSeconds;
 
 volatile double vReal[SAMPLES];  // buffer for real values
@@ -59,7 +58,6 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 void setup() {
-  samplingPeriod = 1000000UL / SAMPLING_FREQUENCY;  //Period in microseconds
   DDRD |= _BV(5);                                                // pinMode(5, OUTPUT);
   DDRB |= _BV(5);                                                // pinMode(LED_BUILTIN, OUTPUT);
   setupTimer1();
